@@ -19,7 +19,7 @@ class App(Base):
     def __init__(self):
         super().__init__()
 
-        print(colored('{} new cards found'.format(len(self.spoiler.get_new_cards())), 'yellow'))
+        print(colored('{} new cards found'.format(len(self.spoiler.new_cards)), 'yellow'))
 
     def start(self):
         bot = telegram.Bot(token=os.getenv('API_TOKEN'))
@@ -28,7 +28,7 @@ class App(Base):
                       'green'))
         print(colored('Beaming spoilers to {}'.format(self.config['telegram-channel-id']), 'green'))
 
-        for card in self.spoiler.get_new_cards():
+        for card in self.spoiler.new_cards:
             bot.send_photo(
                 chat_id='@{}'.format(self.config['telegram-channel-id']),
                 photo=open('./app/cache/card_images/{}.jpg' \
@@ -36,7 +36,7 @@ class App(Base):
             )
             print(colored('[MESSAGE] Send', 'blue'))
 
-        print(colored('Done. {} cards spoiled'.format(len(self.spoiler.get_new_cards())), 'blue'))
+        print(colored('Done. {} cards spoiled'.format(len(self.spoiler.new_cards)), 'blue'))
 
 
 if __name__ == '__main__':

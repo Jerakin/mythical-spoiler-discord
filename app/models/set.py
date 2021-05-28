@@ -2,57 +2,26 @@ from .base import Base
 
 
 class Set(Base):
-
-    # Name
     name = ''
-
-    # Cards
     cards = []
 
-    # Get sets from source
     def __init__(self, name):
         Base.__init__(self)
         self.name = name
         self.cards = []
 
-    # Set cards
-    def set_cards(self, cards):
-        self.cards = cards
-
-    # Append card
-    def append_card(self, card):
+    def append(self, card):
         self.cards.append(card)
 
-    # Get name
-    def get_name(self):
-        return self.name
-
-    # Get cards
-    def get_cards(self):
-        return self.cards
-
-    # Get card urls length
-    def get_cards_length(self):
+    def __len__(self):
         return len(self.cards)
 
-    # Get first card
-    def get_first_card(self):
-        return self.cards[0]
-
-    # Find card
-    def find_card(self, card_name):
+    def find(self, name_of_card):
         for card in self.cards:
-            if card.get_name() == card_name:
+            if card.name == name_of_card:
                 return card
+        return None
 
-        return False
-
-    # Get new cards
-    def get_new_cards(self):
-        cards = []
-
-        for card in self.cards:
-            if card.is_new():
-                cards.append(card)
-
-        return cards
+    @property
+    def new_cards(self):
+        return [card for card in self.cards if card.new]

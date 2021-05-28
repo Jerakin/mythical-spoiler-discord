@@ -10,61 +10,32 @@ class TestSet(unittest.TestCase):
     def setUp(self):
         self.spoiler = Spoiler()
 
-    def test_set_get_sets(self):
-        # Arrange
-        self.spoiler.set_sets(['set1', 'set2'])
+    def test_assign_sets(self):
+        self.spoiler.sets = ['set1', 'set2']
 
-        # Act
-        result = self.spoiler.get_sets()
+        self.assertEqual(self.spoiler.sets, ['set1', 'set2'])
 
-        # Assert
-        self.assertEquals(result, ['set1', 'set2'])
+    def test_append_sets(self):
+        self.spoiler.sets = ['set1', 'set2']
 
-    def test_append_get_sets(self):
-        # Arrange
-        self.spoiler.set_sets(['set1', 'set2'])
-        self.spoiler.append_set('set3')
+        self.spoiler.append('set3')
 
-        # Act
-        result = self.spoiler.get_sets()
+        self.assertEqual(self.spoiler.sets, ['set1', 'set2', 'set3'])
 
-        # Assert
-        self.assertEquals(result, ['set1', 'set2', 'set3'])
+    def test_sets_length(self):
+        self.spoiler.sets = ['set1', 'set2']
 
-    def test_get_sets_length(self):
-        # Arrange
-        self.spoiler.set_sets(['set1', 'set2'])
-
-        # Act
-        result = self.spoiler.get_sets_length()
-
-        # Assert
-        self.assertEquals(result, 2)
-
-    def test_get_first_set(self):
-        # Arrange
-        self.spoiler.set_sets(['set1', 'set2'])
-
-        # Act
-        result = self.spoiler.get_first_set()
-
-        # Assert
-        self.assertEquals(result, 'set1')
+        self.assertEqual(len(self.spoiler.sets), 2)
 
     def test_find_not_existing_set(self):
-        # Act
-        result = self.spoiler.find_set('not-existing-set-name')
+        result = self.spoiler.find('not-existing-set-name')
 
-        # Assert
-        self.assertFalse(result)
+        self.assertIsNone(result)
 
     def test_find_existing_set(self):
-        # Arrange
-        self.spoiler.append_set(Set('set-name'))
+        self.spoiler.append(Set('set-name'))
 
-        # Act
-        result = self.spoiler.find_set('set-name')
+        result = self.spoiler.find('set-name')
 
-        # Assert
-        self.assertEquals(result.get_name(), 'set-name')
+        self.assertEqual(result.name, 'set-name')
 

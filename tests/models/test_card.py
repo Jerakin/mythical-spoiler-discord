@@ -23,120 +23,59 @@ class TestCard(unittest.TestCase):
             'url': 'http://mythicspoiler.com/dom/cards/keldonwarcaller.html',
         })
 
-    def test_get_name(self):
-        # Act
-        result = self.card.get_name()
+    def test_name(self):
+        self.assertEqual(self.card.name, 'Keldon Warcaller')
 
-        # Assert
-        self.assertEquals(result, 'Keldon Warcaller')
+    def test_normalized_name_from_name(self):
+        self.assertEqual(self.card.normalized_name, 'keldonwarcaller')
 
-    def test_get_normalized_name_from_name(self):
-        # Act
-        result = self.card.get_normalized_name()
-
-        # Assert
-        self.assertEquals(result, 'keldonwarcaller')
-
-    def test_get_normalized_name_from_url(self):
-        # Arrange
+    def test_normalized_name_from_url(self):
         self.card.name = None
 
-        # Act
-        result = self.card.get_normalized_name()
+        self.assertEqual(self.card.normalized_name, 'keldonwarcaller')
 
-        # Assert
-        self.assertEquals(result, 'keldonwarcaller')
+    def test_mana_cost(self):
+        self.assertEqual(self.card.mana_cost, '5GBR')
 
-    def test_get_manacost(self):
-        # Act
-        result = self.card.get_manacost()
+    def test_mana_value(self):
+        self.assertEqual(self.card.mana_value, 8)
 
-        # Assert
-        self.assertEquals(result, '5GBR')
+    def test_hybrid_mana(self):
+        self.card.mana_cost = "[G/U][G/U][G/U][G/U]"
+        self.assertEqual(self.card.mana_value, 4)
 
-    def test_get_cmc(self):
-        # Act
-        result = self.card.get_cmc()
+    def test_mixed_hybrid_mana(self):
+        self.card.mana_cost = "2G[G/U]2U"
+        self.assertEqual(self.card.mana_value, 7)
 
-        # Assert
-        self.assertEquals(result, 8)
+    def test_type(self):
+        self.assertEqual(self.card.type, 'Legendary Creature')
 
-    def test_get_type(self):
-        # Act
-        result = self.card.get_type()
+    def test_subtypes(self):
+        self.assertEqual(self.card.sub_types, ['Elemental'])
 
-        # Assert
-        self.assertEquals(result, 'Legendary Creature')
+    def test_set(self):
+        self.assertEqual(self.card.set, 'dom')
 
-    def test_get_subtypes(self):
-        # Act
-        result = self.card.get_sub_types()
+    def test_rules_text(self):
+        self.assertEqual(self.card.rules_text, 'Creatures you control have haste. Cascade, cascade (When you cast this spell, exile cards from the top of your library until you exile a nonland card that costs less. You may cast it without paying its mana cost. Put the exiled cards on the bottom of your library in a random order. Then do it again.)')
 
-        # Assert
-        self.assertEquals(result, ['Elemental'])
+    def test_flavor(self):
+        self.assertEqual(self.card.flavor, 'Test flavor')
 
-    def test_get_subtypes_string(self):
-        # Act
-        result = self.card.get_sub_types_string()
+    def test_artist(self):
+        self.assertEqual(self.card.artist, 'Thomas M. Baxa')
 
-        # Assert
-        self.assertEquals(result, 'Elemental ')
+    def test_power(self):
+        self.assertEqual(self.card.power, '7')
 
-    def test_get_set(self):
-        # Act
-        result = self.card.get_set()
+    def test_toughness(self):
+        self.assertEqual(self.card.toughness, '5')
 
-        # Assert
-        self.assertEquals(result, 'dom')
+    def test_image_filename_from_name(self):
+        self.assertEqual(self.card.get_image_filename(), 'dom_keldonwarcaller')
 
-    def test_get_rules_text(self):
-        # Act
-        result = self.card.get_rules_text()
-
-        # Assert
-        self.assertEquals(result, 'Creatures you control have haste. Cascade, cascade (When you cast this spell, exile cards from the top of your library until you exile a nonland card that costs less. You may cast it without paying its mana cost. Put the exiled cards on the bottom of your library in a random order. Then do it again.)')
-
-    def test_get_flavor(self):
-        # Act
-        result = self.card.get_flavor()
-
-        # Assert
-        self.assertEquals(result, 'Test flavor')
-
-    def test_get_artist(self):
-        # Act
-        result = self.card.get_artist()
-
-        # Assert
-        self.assertEquals(result, 'Thomas M. Baxa')
-
-    def test_get_power(self):
-        # Act
-        result = self.card.get_power()
-
-        # Assert
-        self.assertEquals(result, '7')
-
-    def test_get_toughness(self):
-        # Act
-        result = self.card.get_toughness()
-
-        # Assert
-        self.assertEquals(result, '5')
-
-    def test_get_image_filename_from_name(self):
-        # Act
-        result = self.card.get_image_filename()
-
-        # Assert
-        self.assertEquals(result, 'dom_keldonwarcaller')
-
-    def test_get_image_filename_from_url(self):
-        # Arrange
+    def test_image_filename_from_url(self):
         self.card.name = None
 
-        # Act
-        result = self.card.get_image_filename()
-
-        # Assert
-        self.assertEquals(result, 'dom_keldonwarcaller90')
+        self.assertEqual(self.card.get_image_filename(), 'dom_keldonwarcaller90')

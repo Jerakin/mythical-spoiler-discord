@@ -1,54 +1,27 @@
+from typing import List
+
 from .base import Base
+from .set import Set
 
 
 class Spoiler(Base):
+    sets: List[Set] = []
 
-    # Sets
-    sets = []
-
-    # Get sets from source
     def __init__(self):
         Base.__init__(self)
 
-    # Set sets
-    def set_sets(self, sets):
-        self.sets = sets
-
-    # Append set
-    def append_set(self, set_):
+    def append(self, set_):
         self.sets.append(set_)
 
-    # Get sets
-    def get_sets(self):
-        return self.sets
-
-    # Get sets length
-    def get_sets_length(self):
+    def __len__(self):
         return len(self.sets)
 
-    # Get the latest set
-    def get_first_set(self):
-        return self.sets[0]
-
-    # Find set
-    def find_set(self, set_name):
+    def find(self, name_of_set):
         for set_ in self.sets:
-            if set_.get_name() == set_name:
+            if set_.name == name_of_set:
                 return set_
+        return None
 
-        return False
-
-    # Get all new cards
-    def get_new_cards(self):
-        cards = []
-
-        for set_ in self.sets:
-            cards += set_.get_new_cards()
-
-        return cards
-
-
-
-
-
-
+    @property
+    def new_cards(self):
+        return [card for set_ in self.sets for card in set_.new_cards]

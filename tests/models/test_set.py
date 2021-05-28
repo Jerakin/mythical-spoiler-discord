@@ -10,64 +10,33 @@ class TestSet(unittest.TestCase):
     def setUp(self):
         self.set = Set('m19')
 
-    def test_set_get_cards(self):
-        # Arrange
-        self.set.set_cards(['card1', 'card2'])
+    def test_assign_cards(self):
+        self.set.cards = ['card1', 'card2']
 
-        # Act
-        result = self.set.get_cards()
+        self.assertEqual(self.set.cards, ['card1', 'card2'])
 
-        # Assert
-        self.assertEquals(result, ['card1', 'card2'])
+    def test_append_cards(self):
+        self.set.cards = ['card1', 'card2']
+        self.set.append('card3')
 
-    def test_append_get_cards(self):
-        # Arrange
-        self.set.set_cards(['card1', 'card2'])
-        self.set.append_card('card3')
+        self.assertEqual(self.set.cards, ['card1', 'card2', 'card3'])
 
-        # Act
-        result = self.set.get_cards()
+    def test_name(self):
+        self.assertEqual(self.set.name, 'm19')
 
-        # Assert
-        self.assertEquals(result, ['card1', 'card2', 'card3'])
+    def test_card_length(self):
+        self.set.cards = ['card1', 'card2']
 
-    def test_get_name(self):
-        # Act
-        result = self.set.get_name()
-
-        # Assert
-        self.assertEquals(result, 'm19')
-
-    def test_get_card_length(self):
-        # Arrange
-        self.set.set_cards(['card1', 'card2'])
-
-        # Act
-        result = self.set.get_cards_length()
-
-        # Assert
-        self.assertEquals(result, 2)
-
-    def test_get_first_card(self):
-        # Arrange
-        self.set.set_cards(['card1', 'card2'])
-
-        # Act
-        result = self.set.get_first_card()
-
-        # Assert
-        self.assertEquals(result, 'card1')
+        self.assertEqual(len(self.set), 2)
 
     def test_find_not_existing_card(self):
-        # Act
-        result = self.set.find_card('non-existing-card-name')
+        result = self.set.find('non-existing-card-name')
 
-        # Assert
-        self.assertFalse(result)
+        self.assertIsNone(result)
 
     def test_find_existing_card(self):
         # Arrange
-        self.set.append_card(Card({
+        self.set.append(Card({
             'name': 'test-card-name',
             'manacost': None,
             'type': None,
@@ -82,12 +51,8 @@ class TestSet(unittest.TestCase):
         }))
 
         # Act
-        result = self.set.find_card('test-card-name')
+        result = self.set.find('test-card-name')
 
         # Assert
-        self.assertEquals(result.get_name(), 'test-card-name')
+        self.assertEqual(result.name, 'test-card-name')
         self.assertIsInstance(result, Card)
-
-
-
-

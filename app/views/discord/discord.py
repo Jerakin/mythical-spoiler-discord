@@ -3,12 +3,8 @@ import logging
 import sys
 import traceback
 
-import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-
-from cogs.game import playerdata
-from cogs.uilts import game_strings, exceptions
 
 load_dotenv()
 
@@ -31,12 +27,9 @@ initial_extensions = (
 )
 
 
-class Beans(commands.Bot):
+class MythicBot(commands.Bot):
     def __init__(self, *args, **kwargs):
-        super(Beans, self).__init__(*args, **kwargs)
-        emoji = game_strings.Emoji(self)
-        game_strings.emoji = emoji
-
+        super(MythicBot, self).__init__(*args, **kwargs)
         for extension in initial_extensions:
             try:
                 self.load_extension(extension)
@@ -48,8 +41,8 @@ class Beans(commands.Bot):
         await super().close()
 
 
+bot = MythicBot(command_prefix=PREFIXES, help_command=None)
 
-bot = Beans(command_prefix=PREFIXES, help_command=None)
+
 if __name__ == '__main__':
-    playerdata.start()
     bot.run(TOKEN)
