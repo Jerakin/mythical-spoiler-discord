@@ -14,13 +14,8 @@ project_root = Path(__file__).parent.parent.parent
 
 
 class Cache(Base):
-    # Spoiler
     spoiler = None
-
-    # Scraper
     scraper = None
-
-    # Cache
     cache = {}
 
     def __init__(self, spoiler):
@@ -32,10 +27,10 @@ class Cache(Base):
         self.set_icons_path = self.folder_path / 'set_images'
         self.cards_images_path = self.folder_path / 'card_images'
         self.read_cache()
-        self.start()
+        self.update_cache()
         self.write_cache()
 
-    def start(self):
+    def update_cache(self):
         # Cache set & card data
         for set_name in self.scraper.get_sets():
 
@@ -47,13 +42,13 @@ class Cache(Base):
                 self.cache['sets'][set_name] = {}
                 self.cache_set_images(set_)
 
-            for card_url in self.scraper.get_card_urls(set_.get_name()):
+            for card_url in self.scraper.get_card_urls(set_.name):
                 card_name = self.scraper.get_card_name(card_url)
                 new_card = True
 
                 # Check if card exists, otherwise cache it
-                if not self.has_card(set_.get_name(), card_name):
-                    self.cache['sets'][set_.get_name()][self.scraper.get_card_name(card_url)] = self.scraper.get_card(set_.get_name(), card_url)
+                if not self.has_card(set_.name, card_name):
+                    self.cache['sets'][set_.name][self.scraper.get_card_name(card_url)] = self.scraper.get_card(set_.name, card_url)
 
                     if not self.config['silent']:
                         print(colored('[CACHED][CARD] ' + self.scraper.get_card_name(card_name), 'blue'))
@@ -64,8 +59,8 @@ class Cache(Base):
                         print(colored('[FROM CACHE][CARD] ' + self.scraper.get_card_name(card_name), 'yellow'))
 
                 # Instantiate card model
-                card = Card(self.cache['sets'][set_.get_name()][card_name], new=new_card)
-                set_.append_card(card)
+                card = Card(self.cache['sets'][set_.name][card_name], new=new_card)
+                set_.append(card)
                 self.cache_card_images(card)
 
             self.spoiler.append_set(set_)
@@ -99,28 +94,30 @@ class Cache(Base):
             json.dump(self.cache, file, indent=2)
 
     # Cache set images
-    def cache_set_images(self, set_):
+    def cache_set_images(self, set_: Set):
         # Check if set image exists, otherwise cache it
-        image_path = (self.set_icons_path / set_.get_name()).with_suffix('.png')
+        image_path = (self.set_icons_path / set_.name).with_suffix('.png')
         if not image_path.exists():
             with image_path.open('wb') as fp:
-                fp.write(requests.get(self.config['domain'] + '/' + set_.get_name()).content)
+                fp.write(requests.get(self.config['domain'] + '/' + set_.name).content)
 
             if not self.config['silent']:
-                print(colored('[CACHED][IMAGE] ' + set_.get_name() + '.png', 'blue'))
+                print(colored('[CACHED][IMAGE] ' + set_.name + '.png', 'blue'))
 
     # Cache card images
-    def cache_card_images(self, card):
+    def cache_card_images(self, card: Card):
         # Check if card image exists, otherwise cache it
         image_path = (self.cards_images_path / card.get_image_filename()).with_suffix('.jpg')
         if not image_path.exists() and card.get_image_filename() != '':
             with image_path.open('wb') as fp:
                 fp.write(requests.get(
-                    self.config['domain'] + '/' + card.get_set() + '/cards/' + card.get_normalized_name() + '.jpg').content)
+                    self.config['domain'] + '/' + card.set + '/cards/' + card.normalized_name + '.jpg').content)
 
             if not self.config['silent']:
                 print(colored('[CACHED][IMAGE] ' + card.get_image_filename() + '.jpg', 'blue'))
 
     # Return all new cards in the spoiler model
     def get_new_spoilers(self):
-        return self.spoiler
+        for x in self.spoiler.new_cards:
+            if x.new:
+                yield x

@@ -21,13 +21,14 @@ class ModCog(commands.Cog):
         self.bot = bot
         self.spoiler = Spoiler()
         self.cache = Cache(self.spoiler)
+        self.cache.update_cache()
 
     async def cog_check(self, ctx):
         return ctx.message.author.server_permissions.administrator
 
     @tasks.loop(minutes=0.5)
     async def update_cache(self):
-        pass
+        self.cache.update_cache()
 
 
 def setup(bot):

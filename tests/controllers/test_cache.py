@@ -9,7 +9,7 @@ class TestCache(unittest.TestCase):
 
     def setUp(self):
         self.cache = Cache(Spoiler())
-        self.cache.start()
+        self.cache.update_cache()
 
     def test_has_set(self):
         # Act
