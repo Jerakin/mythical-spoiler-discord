@@ -3,8 +3,9 @@ import logging
 import sys
 import traceback
 
-from discord.ext import commands
+import discord.ext.commands as commands
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
