@@ -1,9 +1,11 @@
 from pathlib import Path
 from shutil import copyfile
-import requests
 import json
+import os
 
-from app.utils import logger
+import requests
+
+from app.utils import logger, slugify
 from typing import Tuple, List
 from .base import Base
 from .scraper import Scraper
@@ -124,3 +126,9 @@ class Cache(Base):
     def get_latest(self, amount=1):
         latest = self.scraper.get_latest(amount)
         return [Card(card, new=False) for card in latest]
+
+    def delete(self, card):
+        del self.cache['sets'][card.set][slugify(card.name)]
+        image, exists = self.card_image_path(card)
+        if exists:
+            os.remove(image)

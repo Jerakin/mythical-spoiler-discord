@@ -27,3 +27,6 @@ class Spoiler(Base):
 
     def get_latest(self, amount=1):
         return self.cache.get_latest(amount)
+
+    def delete(self, card):
+        self.cache.delete(card)
