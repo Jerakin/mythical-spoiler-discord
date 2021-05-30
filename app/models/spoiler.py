@@ -25,5 +25,5 @@ class Spoiler(Base):
     def get_card_image(self, card):
         return self.cache.card_image_path(card)
 
-    def get_latest(self, index=0):
-        return self.cache.sets[-1].cards[-1-index]
+    def get_latest(self, amount=1):
+        return self.cache.get_latest(amount)

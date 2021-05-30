@@ -1,13 +1,12 @@
-import os
 from pathlib import Path
 from shutil import copyfile
 import requests
 import json
 
+from app.utils import logger
 from typing import Tuple, List
 from .base import Base
 from .scraper import Scraper
-from app.utils import colored
 from app.models.set import Set
 from app.models.card import Card
 
@@ -47,15 +46,11 @@ class Cache(Base):
 
                 # Check if card exists, otherwise cache it
                 if not self.has_card(set_.name, card_name):
+                    logger.debug(f"Card from website: {self.scraper.get_card_name(card_name)}")
                     self.cache['sets'][set_.name][self.scraper.get_card_name(card_url)] = self.scraper.get_card(set_.name, card_url)
-
-                    if not self.config['silent']:
-                        print(colored('[CACHED][CARD] ' + self.scraper.get_card_name(card_name), 'blue'))
                 else:
+                    logger.debug(f"Card from cache: {self.scraper.get_card_name(card_name)}")
                     new_card = False
-
-                    if not self.config['silent']:
-                        print(colored('[FROM CACHE][CARD] ' + self.scraper.get_card_name(card_name), 'yellow'))
 
                 # Instantiate card model
                 card = Card(self.cache['sets'][set_.name][card_name], new=new_card)
@@ -98,30 +93,34 @@ class Cache(Base):
         # Check if set image exists, otherwise download it
         image_path, exists = self.set_image_path(set_)
         if not exists:
+            logger.debug(f"Downloaded Set image: {set_.name}.png")
             with image_path.open('wb') as fp:
                 fp.write(requests.get(self.config['domain'] + '/' + set_.name).content)
-
-            if not self.config['silent']:
-                print(colored('[CACHED][IMAGE] ' + set_.name + '.png', 'blue'))
 
     # Download card images
     def download_card_images(self, card: Card):
         # Check if card image exists, otherwise download it
         image_path, exists = self.card_image_path(card)
         if not exists:
+            logger.debug(f"Downloaded Card image: {card.get_image_filename()}.jpg")
             with image_path.open('wb') as fp:
                 fp.write(requests.get(
                     self.config['domain'] + '/' + card.set + '/cards/' + card.normalized_name + '.jpg').content)
 
-            if not self.config['silent']:
-                print(colored('[CACHED][IMAGE] ' + card.get_image_filename() + '.jpg', 'blue'))
-
     def card_image_path(self, card: Card) -> Tuple[Path, bool]:
         """:returns path to the Card image if the image exists else returns None"""
         image_path = (self.cards_images_path / card.get_image_filename()).with_suffix('.jpg')
+        if not image_path.exists():
+            image_path = image_path.with_name(image_path.stem + "90").with_suffix(".jpg")
         return image_path, image_path.exists()
 
     def set_image_path(self, set_: Set) -> Tuple[Path, bool]:
         """:returns path to the Set image if the image exists else returns None"""
         image_path = (self.set_icons_path / set_.name).with_suffix('.png')
+        if not image_path.exists():
+            image_path = image_path.with_name(image_path.stem + "90").with_suffix(".jpg")
         return image_path, image_path.exists()
+
+    def get_latest(self, amount=1):
+        latest = self.scraper.get_latest(amount)
+        return [Card(card, new=False) for card in latest]

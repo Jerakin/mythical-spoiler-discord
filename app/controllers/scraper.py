@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from app.controllers.base import Base
-from app.utils import colored, slugify
+from app.utils import slugify, logger
 
 
 class Scraper(Base):
@@ -12,9 +12,26 @@ class Scraper(Base):
     def get_card_name(card_url):
         return slugify(card_url.replace('cards/', '').replace('.html', ''))
 
+    def get_latest(self, amount=1):
+        soup = BeautifulSoup(requests.get(self.config['domain'] + self.config['new-sets-url']).text, 'lxml')
+
+        ordered = []
+        for card in soup.find_all('div', {"class": "grid-container"}):
+            card_ref = card.find('a')['href']
+            set_, *url_ = card_ref.split("/")
+            latest = self.get_card(set_.strip(), "/".join(url_).strip())
+            if latest:
+                ordered.append(latest)
+                logger.info(f"Latest: {latest['name']}")
+            else:
+                logger.debug("Could not find latest card")
+
+            if amount >= len(ordered):
+                return ordered
+        return ordered
+
     def get_sets(self):
-        if not self.config['silent']:
-            print(colored('[GET][SETS]', 'green'))
+        logger.info("Available Sets")
 
         soup = BeautifulSoup(requests.get(self.config['domain'] + self.config['new-sets-url']).text, 'lxml')
         sets = []
@@ -23,42 +40,38 @@ class Scraper(Base):
             set_name = set_.find('a')['href']
 
             if len(set_name) < 5:
-                # Map set names
+                logger.info(f"-- {set_name}")
                 sets.append(set_name)
-
         return sets
 
     def get_card_urls(self, set_name):
-        if not self.config['silent']:
-            print(colored('[GET][SET] ' + set_name, 'green'))
-
-        soup = BeautifulSoup(requests.get(self.config['domain'] + '/' + set_name).text, 'lxml')
+        soup = BeautifulSoup(requests.get(f"{self.config['domain']}/{set_name}").text, 'lxml')
         card_urls = []
+        card = soup.find('a', 'card')
+        while card:
+            try:
+                card_url = card["href"]
+                if card_url.startswith("cards/"):
+                    card_urls.append(card_url)
+            except KeyError:
+                pass
 
-        for card in soup.findAll('a', 'card'):
-            card_urls.append(card['href'])
+            card = card.find_next()
 
         return card_urls
 
     def get_card(self, set_name, card_url):
-
-        if not self.config['silent']:
-            print(colored('[GET][CARD] ' + self.get_card_name(card_url), 'green'))
-
         # Get card data
         try:
-            page = BeautifulSoup(requests.get(self.config['domain'] + '/' + set_name + '/' + card_url).text, 'lxml')
+            page = BeautifulSoup(requests.get(f"{self.config['domain']}/{set_name}/{card_url}").text, 'lxml')
             card = page \
                 .find('table',
                       attrs={'valign': 'top', 'cellspacing': 0, 'cellpadding': 5, 'border': 0, 'align': 'center'}) \
                 .findAll('td')
 
         except Exception as e:
-            if not self.config['silent']:
-                print(colored('[ERROR] Could not get card data from ' + self.config['domain'] + '/' + set_name + '/' + card_url, 'red'))
-
-            if self.config['debug']['is-enabled']:
-                print(colored(e, 'red'))
+            logger.info(f"Could not get card data from {self.config['domain']}/{set_name}/{card_url}")
+            logger.debug(e)
 
         # Parse card data
         try:
@@ -90,15 +103,12 @@ class Scraper(Base):
                 'artist': None,
                 'power': None,
                 'toughness': None,
-                'url': self.config['domain'] + '/' + set_name + '/' + card_url
+                'url': f"{self.config['domain']}/{set_name}/{card_url}"
             }
         except Exception as e:
-            if not self.config['silent']:
-                print(colored('[ERROR] Could not parse card data from ' + self.config['domain'] + '/' + set_name + '/' + card_url, 'red'))
-
-            if self.config['debug']['is-enabled']:
-                print(colored(e, 'red'))
-            return None
+            logger.info(f"Could not parse card data from {self.config['domain']}/{set_name}/{card_url}")
+            logger.debug(e)
+        return None
 
 
 if __name__ == '__main__':

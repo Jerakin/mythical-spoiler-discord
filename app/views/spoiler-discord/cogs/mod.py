@@ -1,14 +1,4 @@
-import re
-import os
-import sys
-import subprocess
-import importlib
-import logging
-
-import asyncio
 from discord.ext import commands
-
-log = logging.getLogger('bot')
 
 
 class ModCog(commands.Cog):
@@ -16,7 +6,7 @@ class ModCog(commands.Cog):
         self.bot = bot
 
     async def cog_check(self, ctx):
-        return ctx.message.author.server_permissions.administrator
+        return ctx.message.author.guild_permissions.administrator
 
     async def sub(self):
         pass

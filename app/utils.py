@@ -1,11 +1,15 @@
 import re
 import unicodedata
+import logging
+import sys
 
-try:
-    from termcolor import colored
-except ImportError:
-    def colored(string, color):
-        return string
+log_formatter = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(log_formatter)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+if not logger.handlers:
+    logger.addHandler(handler)
 
 
 def slugify(value, allow_unicode=False):
