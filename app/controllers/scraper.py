@@ -1,5 +1,3 @@
-# https://github.com/dfsoeten/mtg-spoiler-bot/blob/master/app/controllers/scraper.py
-
 import requests
 from bs4 import BeautifulSoup
 from app.controllers.base import Base

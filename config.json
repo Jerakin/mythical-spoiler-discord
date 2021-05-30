@@ -2,9 +2,8 @@
   "domain": "http://mythicspoiler.com",
   "new-sets-url": "/newspoilers.html",
   "telegram-channel-id": "mtg_spoilers",
-  "silent": false,
+  "silent": true,
   "debug": {
-    "is-enabled": true,
-    "card-index": 14
+    "is-enabled": true
   }
 }

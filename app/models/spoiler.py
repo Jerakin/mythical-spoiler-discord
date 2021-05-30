@@ -1,27 +1,29 @@
-from typing import List
-
 from .base import Base
-from .set import Set
 
 
 class Spoiler(Base):
-    sets: List[Set] = []
+    def __init__(self, cache):
+        super(Spoiler, self).__init__()
+        self.cache = cache
 
-    def __init__(self):
-        Base.__init__(self)
-
-    def append(self, set_):
-        self.sets.append(set_)
+    def update_cache(self):
+        self.cache.update_cache()
 
     def __len__(self):
-        return len(self.sets)
+        return len(self.cache.sets)
 
     def find(self, name_of_set):
-        for set_ in self.sets:
+        for set_ in self.cache.sets:
             if set_.name == name_of_set:
                 return set_
         return None
 
     @property
     def new_cards(self):
-        return [card for set_ in self.sets for card in set_.new_cards]
+        return [card for set_ in self.cache.sets for card in set_.new_cards]
+
+    def get_card_image(self, card):
+        return self.cache.card_image_path(card)
+
+    def get_latest(self, index=0):
+        return self.cache.sets[-1].cards[-1-index]

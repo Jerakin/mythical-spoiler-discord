@@ -4,6 +4,7 @@ from shutil import copyfile
 import requests
 import json
 
+from typing import Tuple, List
 from .base import Base
 from .scraper import Scraper
 from app.utils import colored
@@ -18,17 +19,15 @@ class Cache(Base):
     scraper = None
     cache = {}
 
-    def __init__(self, spoiler):
+    def __init__(self):
         Base.__init__(self)
-        self.spoiler = spoiler
+        self.sets: List[Set] = list()
         self.scraper = Scraper()
         self.folder_path = Path().home() / ".mythical-spoiler" / 'cache'
         self.cache_path = self.folder_path / 'cache.json'
         self.set_icons_path = self.folder_path / 'set_images'
         self.cards_images_path = self.folder_path / 'card_images'
-        self.read_cache()
-        self.update_cache()
-        self.write_cache()
+        self.load_cache()
 
     def update_cache(self):
         # Cache set & card data
@@ -40,7 +39,7 @@ class Cache(Base):
             # Check if set exists, otherwise cache it
             if not self.has_set(set_name):
                 self.cache['sets'][set_name] = {}
-                self.cache_set_images(set_)
+                self.download_set_images(set_)
 
             for card_url in self.scraper.get_card_urls(set_.name):
                 card_name = self.scraper.get_card_name(card_url)
@@ -61,9 +60,10 @@ class Cache(Base):
                 # Instantiate card model
                 card = Card(self.cache['sets'][set_.name][card_name], new=new_card)
                 set_.append(card)
-                self.cache_card_images(card)
+                self.download_card_images(card)
 
-            self.spoiler.append_set(set_)
+            self.sets.append(set_)
+        self.write_cache()
 
     # Check if the cache has set
     def has_set(self, set_name):
@@ -74,7 +74,7 @@ class Cache(Base):
         return card_name in self.cache['sets'][set_name] if self.has_set(set_name) else False
 
     # Read cache
-    def read_cache(self):
+    def load_cache(self):
         if not self.folder_path.exists():
             self.folder_path.mkdir(parents=True)
         if not self.set_icons_path.exists():
@@ -93,22 +93,22 @@ class Cache(Base):
         with self.cache_path.open('w+') as file:
             json.dump(self.cache, file, indent=2)
 
-    # Cache set images
-    def cache_set_images(self, set_: Set):
-        # Check if set image exists, otherwise cache it
-        image_path = (self.set_icons_path / set_.name).with_suffix('.png')
-        if not image_path.exists():
+    # Download set images
+    def download_set_images(self, set_: Set):
+        # Check if set image exists, otherwise download it
+        image_path, exists = self.set_image_path(set_)
+        if not exists:
             with image_path.open('wb') as fp:
                 fp.write(requests.get(self.config['domain'] + '/' + set_.name).content)
 
             if not self.config['silent']:
                 print(colored('[CACHED][IMAGE] ' + set_.name + '.png', 'blue'))
 
-    # Cache card images
-    def cache_card_images(self, card: Card):
-        # Check if card image exists, otherwise cache it
-        image_path = (self.cards_images_path / card.get_image_filename()).with_suffix('.jpg')
-        if not image_path.exists() and card.get_image_filename() != '':
+    # Download card images
+    def download_card_images(self, card: Card):
+        # Check if card image exists, otherwise download it
+        image_path, exists = self.card_image_path(card)
+        if not exists:
             with image_path.open('wb') as fp:
                 fp.write(requests.get(
                     self.config['domain'] + '/' + card.set + '/cards/' + card.normalized_name + '.jpg').content)
@@ -116,8 +116,12 @@ class Cache(Base):
             if not self.config['silent']:
                 print(colored('[CACHED][IMAGE] ' + card.get_image_filename() + '.jpg', 'blue'))
 
-    # Return all new cards in the spoiler model
-    def get_new_spoilers(self):
-        for x in self.spoiler.new_cards:
-            if x.new:
-                yield x
+    def card_image_path(self, card: Card) -> Tuple[Path, bool]:
+        """:returns path to the Card image if the image exists else returns None"""
+        image_path = (self.cards_images_path / card.get_image_filename()).with_suffix('.jpg')
+        return image_path, image_path.exists()
+
+    def set_image_path(self, set_: Set) -> Tuple[Path, bool]:
+        """:returns path to the Set image if the image exists else returns None"""
+        image_path = (self.set_icons_path / set_.name).with_suffix('.png')
+        return image_path, image_path.exists()

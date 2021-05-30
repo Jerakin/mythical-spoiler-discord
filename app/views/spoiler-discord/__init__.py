@@ -24,6 +24,7 @@ log = logging.getLogger('bot')
 
 initial_extensions = (
     'cogs.admin',
+    'cogs.spoilers',
     'cogs.mod'
 )
 

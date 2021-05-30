@@ -10,15 +10,11 @@ from app.utils import colored
 
 
 class App(Base):
-    # Spoiler data
-    spoiler = Spoiler()
-
-    # Cache spoiler data
-    cache = Cache(spoiler)
-
     def __init__(self):
         super().__init__()
-
+        cache = Cache()
+        self.spoiler = Spoiler(cache)
+        self.spoiler.update_cache()
         print(colored('{} new cards found'.format(len(self.spoiler.new_cards)), 'yellow'))
 
     def start(self):
