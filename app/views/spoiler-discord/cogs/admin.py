@@ -116,6 +116,12 @@ class AdminCog(commands.Cog):
 
         await ctx.send('\n'.join(f'{status}: `{module}`' for status, module in statuses))
 
+    @commands.command()
+    async def force(self, ctx):
+        self.bot.spoiler.update_cache()
+        for card in self.bot.spoiler.new_cards:
+            await self.bot.send_image(ctx.channel, card)
+
 
 def setup(bot):
     bot.add_cog(AdminCog(bot))
