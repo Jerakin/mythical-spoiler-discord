@@ -2,10 +2,14 @@ import os
 import logging
 import sys
 import traceback
+from pathlib import Path
 
 import discord.ext.commands as commands
 from dotenv import load_dotenv
 
+app = Path(__file__).parent.parent.parent.parent.parent.as_posix()
+if app not in sys.path:
+    sys.path.append(app)
 
 load_dotenv()
 
