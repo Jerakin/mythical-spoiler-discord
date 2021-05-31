@@ -8,13 +8,14 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+app = Path(__file__).parent.parent.parent.parent.parent.as_posix()
+if app not in sys.path:
+    sys.path.append(app)
+
 from app.models.spoiler import Spoiler
 from app.controllers.cache import Cache
 from app.utils import logger
 
-app = Path(__file__).parent.parent.parent.parent.parent.as_posix()
-if app not in sys.path:
-    sys.path.append(app)
 
 load_dotenv()
 
