@@ -1,16 +1,16 @@
 import os
-import logging
 import sys
 import traceback
 import json
 from pathlib import Path
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from app.models.spoiler import Spoiler
 from app.controllers.cache import Cache
+from app.utils import logger
 
 app = Path(__file__).parent.parent.parent.parent.parent.as_posix()
 if app not in sys.path:
@@ -20,16 +20,6 @@ load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIXES = os.getenv('PREFIXES').split(",")
-
-
-log_formatter = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(log_formatter)
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-if not len(logger.handlers):
-    logger.addHandler(handler)
-
 
 initial_extensions = (
     'cogs.admin',

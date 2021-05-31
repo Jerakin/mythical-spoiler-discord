@@ -16,12 +16,9 @@ project_root = Path(__file__).parent.parent.parent
 
 
 class Cache(Base):
-    spoiler = None
-    scraper = None
-    cache = {}
-
     def __init__(self):
         Base.__init__(self)
+        self.cache = dict()
         self.sets: List[Set] = list()
         self.scraper = Scraper()
         self.folder_path = Path().home() / ".mythical-spoiler" / 'cache'

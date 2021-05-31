@@ -4,33 +4,19 @@ from app.utils import slugify
 
 
 class Card(Base):
-    name = ''
-    mana_cost = ''
-    type = ''
-    sub_types = []
-    set = ''
-    rules_text = ''
-    flavor = ''
-    artist = ''
-    power = None
-    toughness = None
-    url = ''
-    new = False
-
     def __init__(self, c, new=False):
-        Base.__init__(self)
-        if c:
-            self.name = c['name']
-            self.mana_cost = c['manacost']
-            self.type = c['type']
-            self.sub_types = c['sub_types']
-            self.set = c['set']
-            self.rules_text = c['rules_text']
-            self.flavor = c['flavor']
-            self.artist = c['artist']
-            self.power = c['power']
-            self.toughness = c['toughness']
-            self.url = c['url']
+        super(Card, self).__init__()
+        self.name = c['name']
+        self.mana_cost = c['manacost']
+        self.type = c['type']
+        self.sub_types = c['sub_types']
+        self.set = c['set']
+        self.rules_text = c['rules_text']
+        self.flavor = c['flavor']
+        self.artist = c['artist']
+        self.power = c['power']
+        self.toughness = c['toughness']
+        self.url = c['url']
 
         self.new = new
 

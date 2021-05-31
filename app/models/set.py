@@ -2,11 +2,8 @@ from .base import Base
 
 
 class Set(Base):
-    name = ''
-    cards = []
-
     def __init__(self, name):
-        Base.__init__(self)
+        super(Set, self).__init__()
         self.name = name
         self.cards = []
 
