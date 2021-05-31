@@ -47,6 +47,7 @@ class MythicBot(commands.Bot):
         await super().close()
 
 
+log.info(f"""Prefixes: {", ".join([f'"{x}"' for x in PREFIXES])}""")
 bot = MythicBot(command_prefix=PREFIXES, help_command=None)
 
 
