@@ -23,10 +23,11 @@ class ModCog(commands.Cog):
 
     @commands.command()
     async def subscribe(self, ctx: commands.Context):
-        logger.info("Server subsribed")
+        logger.info(f"Server '{ctx.guild.name}' with id '{ctx.guild.id}' subscribed")
         if ctx.channel not in self.bot.conf["channels"]:
             self.bot.conf["channels"].append(ctx.channel.id)
             self.bot.save_servers()
+            await ctx.channel.send("You will now get Spoiler images sent here")
 
     @tasks.loop(minutes=5)
     async def check_spoilers(self):
