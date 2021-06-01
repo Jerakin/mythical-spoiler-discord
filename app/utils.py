@@ -6,7 +6,8 @@ import sys
 log_formatter = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(log_formatter)
-logger = logging.getLogger()
+logger = logging.getLogger("DiscordBot")
+logger.propagate = False
 logger.setLevel(logging.DEBUG)
 if not logger.handlers:
     logger.addHandler(handler)
