@@ -63,7 +63,7 @@ class MythicBot(commands.Bot):
         logger.info(f"Sending card {card.name}, Image: {exists}")
         if exists:
             with image_path.open("rb") as fp:
-                picture = discord.File(fp, filename=card.name)
+                picture = discord.File(fp, filename=card.name + ".jpg")
             await channel.send(file=picture)
 
     async def close(self):
