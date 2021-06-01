@@ -16,6 +16,9 @@ class ModCog(commands.Cog):
     async def spoil(self, card):
         for channel_id in self.bot.conf["channels"]:
             channel = self.bot.get_channel(channel_id)
+            if channel is None:
+                logger.warning(f"Can not find channel with id '{channel_id}'")
+                return
             await self.bot.send_image(channel, card)
 
     @commands.command()
