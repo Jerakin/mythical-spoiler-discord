@@ -60,6 +60,7 @@ class MythicBot(commands.Bot):
 
     async def send_image(self, channel, card):
         image_path, exists = self.spoiler.get_card_image(card)
+        logger.info(f"Sending card {card.name}, Image: {exists}")
         if exists:
             with image_path.open("rb") as fp:
                 picture = discord.File(fp, filename=card.name)

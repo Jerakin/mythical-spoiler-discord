@@ -52,10 +52,13 @@ class Cache(Base):
                     new_card = False
 
                 # Instantiate card model
-                card = Card(self.cache['sets'][set_.name][card_name], new=new_card)
-                set_.append(card)
-                self.download_card_images(card)
-
+                _card = self.cache['sets'][set_.name][card_name]
+                if _card:
+                    card = Card(_card, new=new_card)
+                    set_.append(card)
+                    self.download_card_images(card)
+                else:
+                    logger.warning(f"Can't find card [{set_.name}] - {card_name}")
             self.sets.append(set_)
         self.write_cache()
 
