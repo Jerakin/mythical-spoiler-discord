@@ -1,16 +1,17 @@
 from discord.ext import commands, tasks
+from app.utils import logger
 
 
 class ModCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.update_cache.start()
+        self.check_spoilers.start()
 
     async def cog_check(self, ctx):
         return ctx.message.author.guild_permissions.administrator
 
     def cog_unload(self):
-        self.update_cache.cancel()
+        self.check_spoilers.cancel()
 
     async def spoil(self, card):
         for channel_id in self.bot.conf["channels"]:
@@ -18,13 +19,15 @@ class ModCog(commands.Cog):
             await self.bot.send_image(channel, card)
 
     @commands.command()
-    async def listen(self, ctx: commands.Context):
+    async def subscribe(self, ctx: commands.Context):
+        logger.info("Server subsribed")
         if ctx.channel not in self.bot.conf["channels"]:
             self.bot.conf["channels"].append(ctx.channel.id)
             self.bot.save_servers()
 
     @tasks.loop(minutes=5)
-    async def update_cache(self):
+    async def check_spoilers(self):
+        logger.info("Updating Cache")
         self.bot.spoiler.update_cache()
         for card in self.bot.spoiler.new_cards:
             card.new = False
