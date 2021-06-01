@@ -29,6 +29,14 @@ class ModCog(commands.Cog):
             self.bot.save_servers()
             await ctx.channel.send("You will now get Spoiler images sent here")
 
+    @commands.command()
+    async def unsubscribe(self, ctx: commands.Context):
+        logger.info(f"Server '{ctx.guild.name}' with id '{ctx.guild.id}' unsubscribed")
+        if ctx.channel in self.bot.conf["channels"]:
+            self.bot.conf["channels"].remove(ctx.channel.id)
+            self.bot.save_servers()
+            await ctx.channel.send("You will no longer get spoilers here")
+
     @tasks.loop(minutes=5)
     async def check_spoilers(self):
         logger.info("Updating Cache")
