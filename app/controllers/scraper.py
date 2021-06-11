@@ -10,8 +10,8 @@ class Scraper(Base):
         super(Scraper, self).__init__()
 
     @staticmethod
-    def get_card_name(card_url):
-        return slugify(card_url.replace('cards/', '').replace('.html', ''))
+    def get_pretty_name(card):
+        return slugify(card['name'])
 
     def get_latest(self, amount=1):
         return list(self.latest())[:amount]
@@ -60,7 +60,7 @@ class Scraper(Base):
         except IndexError:
             # The card is probably a dual face card
             return {
-                'name': self.get_card_name(card_url),
+                'name': slugify(card_url.replace('cards/', '').replace('.html', '').replace(set_name, '')),
                 'manacost': None,
                 'type': None,
                 'sub_types': None,

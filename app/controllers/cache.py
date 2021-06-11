@@ -30,23 +30,25 @@ class Cache(Base):
     def update_cache(self):
         # Cache set & card data
         for card_data in self.scraper.latest():
-            set_name = card_data["set_name"]
+            card_name = self.scraper.get_pretty_name(card_data)
+            if not card_name:
+                continue
+            set_name = card_data["set"]
             # Instantiate set models
             set_ = Set(set_name)
 
             # Check if set exists, otherwise cache it
             if not self.has_set(set_name):
                 self.cache['sets'][set_name] = {}
-            card_url = card_data['url']
-            card_name = card_data['name']
+            card_name = self.scraper.get_pretty_name(card_data)
             new_card = True
 
             # Check if card exists, otherwise cache it
             if not self.has_card(set_.name, card_name):
-                logger.debug(f"Card from website: {self.scraper.get_card_name(card_name)}")
-                self.cache['sets'][set_.name][self.scraper.get_card_name(card_url)] = card_data
+                logger.debug(f"Card from website: {card_name}")
+                self.cache['sets'][set_.name][card_name] = card_data
             else:
-                logger.debug(f"Card from cache: {self.scraper.get_card_name(card_name)}")
+                logger.debug(f"Card from cache: {card_name}")
                 new_card = False
 
             # Instantiate card model
@@ -121,7 +123,7 @@ class Cache(Base):
             image_path = image_path.with_name(image_path.stem + "90").with_suffix(".jpg")
         return image_path, image_path.exists()
 
-    def get_latest(self, amount=1):
+    def get_latest(self, amount=1) -> List:
         latest = self.scraper.get_latest(amount)
         return [Card(card, new=False) for card in latest]
 

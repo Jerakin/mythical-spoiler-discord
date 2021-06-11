@@ -122,6 +122,12 @@ class AdminCog(commands.Cog):
         for card in self.bot.spoiler.new_cards:
             await self.bot.send_image(ctx.channel, card)
 
+    @commands.command()
+    async def pop(self, ctx):
+        for card in self.bot.spoiler.get_latest():
+            self.bot.spoiler.delete(card)
+            await ctx.send(f"Purged {card.name}")
+
 
 def setup(bot):
     bot.add_cog(AdminCog(bot))
