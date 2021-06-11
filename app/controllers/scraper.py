@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from app.controllers.base import Base
 from app.utils import slugify, logger
+from pathlib import PosixPath
 
 
 class Scraper(Base):
@@ -13,62 +14,26 @@ class Scraper(Base):
         return slugify(card_url.replace('cards/', '').replace('.html', ''))
 
     def get_latest(self, amount=1):
-        soup = BeautifulSoup(requests.get(self.config['domain'] + self.config['new-sets-url']).text, 'lxml')
+        return list(self.latest())[:amount]
 
-        ordered = []
+    def latest(self):
+        soup = BeautifulSoup(requests.get(self.config['domain'] + self.config['new-sets-url']).text, 'lxml')
         for card in soup.find_all('div', {"class": "grid-container"}):
             card_ref = card.find('a')['href']
             set_, *url_ = card_ref.split("/")
-            latest = self.get_card(set_.strip(), "/".join(url_).strip())
-            if latest:
-                ordered.append(latest)
-                logger.info(f"Latest: {latest['name']}")
-            else:
-                logger.debug("Could not find latest card")
-
-            if amount >= len(ordered):
-                return ordered
-        return ordered
-
-    def get_sets(self):
-        logger.info("Available Sets")
-
-        soup = BeautifulSoup(requests.get(self.config['domain'] + self.config['new-sets-url']).text, 'lxml')
-        sets = []
-
-        for set_ in soup.find('tr', attrs={'align': 'center'}).findAll('td'):
-            set_name = set_.find('a')['href']
-
-            if len(set_name) < 5:
-                logger.info(f"-- {set_name}")
-                sets.append(set_name)
-        return sets
-
-    def get_card_urls(self, set_name):
-        soup = BeautifulSoup(requests.get(f"{self.config['domain']}/{set_name}").text, 'lxml')
-        card_urls = []
-        card = soup.find('a', 'card')
-        while card:
-            try:
-                card_url = card["href"]
-                if card_url.startswith("cards/"):
-                    card_urls.append(card_url)
-            except KeyError:
-                pass
-
-            card = card.find_next()
-
-        return card_urls
+            new_card = self.get_card(set_.strip(), "/".join(url_).strip())
+            if new_card:
+                yield new_card
 
     def get_card(self, set_name, card_url):
         # Get card data
+        image_url = (self.config['domain'] + '/' + set_name + '/' + card_url).replace(".html", ".jpg")
         try:
             page = BeautifulSoup(requests.get(f"{self.config['domain']}/{set_name}/{card_url}").text, 'lxml')
             card = page \
                 .find('table',
                       attrs={'valign': 'top', 'cellspacing': 0, 'cellpadding': 5, 'border': 0, 'align': 'center'}) \
                 .findAll('td')
-
         except Exception as e:
             logger.info(f"Could not get card data from {self.config['domain']}/{set_name}/{card_url}")
             logger.debug(e)
@@ -77,6 +42,7 @@ class Scraper(Base):
         try:
             types = [c.strip() for c in card[2].text.strip().split('-')]
             pwr_thg = [pt.strip() for pt in card[7].find('font').text.strip().split('/')]
+
             return {
                 'name': card[0].text.strip(),
                 'manacost': card[1].text.strip(),
@@ -88,7 +54,8 @@ class Scraper(Base):
                 'artist': card[6].find('font').text.strip(),
                 'power': pwr_thg[0] if len(pwr_thg) == 2 else None,
                 'toughness': pwr_thg[1] if len(pwr_thg) == 2 else None,
-                'url': self.config['domain'] + '/' + set_name + '/' + card_url
+                'url': f"{self.config['domain']}/{set_name}/{card_url}",
+                'image': image_url
             }
         except IndexError:
             # The card is probably a dual face card
@@ -103,7 +70,8 @@ class Scraper(Base):
                 'artist': None,
                 'power': None,
                 'toughness': None,
-                'url': f"{self.config['domain']}/{set_name}/{card_url}"
+                'url': f"{self.config['domain']}/{set_name}/{card_url}",
+                'image': image_url
             }
         except Exception as e:
             logger.info(f"Could not parse card data from {self.config['domain']}/{set_name}/{card_url}")
@@ -112,10 +80,7 @@ class Scraper(Base):
 
 
 if __name__ == '__main__':
-    _card = 'cards/glasspoolmimic.html'
-    _card2 = 'cards/nimbletrapfinder.html'
     scraper = Scraper()
-    if _card in scraper.get_card_urls("zrs"):
-        print(scraper.get_card('zrs', _card))
-    if _card2 in scraper.get_card_urls("zrs"):
-        print(scraper.get_card('zrs', _card2))
+    for _card in scraper.latest():
+        if _card['name'] == "Resurgent Belief":
+            print(_card)

@@ -29,36 +29,34 @@ class Cache(Base):
 
     def update_cache(self):
         # Cache set & card data
-        for set_name in self.scraper.get_sets():
-
+        for card_data in self.scraper.latest():
+            set_name = card_data["set_name"]
             # Instantiate set models
             set_ = Set(set_name)
 
             # Check if set exists, otherwise cache it
             if not self.has_set(set_name):
                 self.cache['sets'][set_name] = {}
-                self.download_set_images(set_)
+            card_url = card_data['url']
+            card_name = card_data['name']
+            new_card = True
 
-            for card_url in self.scraper.get_card_urls(set_.name):
-                card_name = self.scraper.get_card_name(card_url)
-                new_card = True
+            # Check if card exists, otherwise cache it
+            if not self.has_card(set_.name, card_name):
+                logger.debug(f"Card from website: {self.scraper.get_card_name(card_name)}")
+                self.cache['sets'][set_.name][self.scraper.get_card_name(card_url)] = card_data
+            else:
+                logger.debug(f"Card from cache: {self.scraper.get_card_name(card_name)}")
+                new_card = False
 
-                # Check if card exists, otherwise cache it
-                if not self.has_card(set_.name, card_name):
-                    logger.debug(f"Card from website: {self.scraper.get_card_name(card_name)}")
-                    self.cache['sets'][set_.name][self.scraper.get_card_name(card_url)] = self.scraper.get_card(set_.name, card_url)
-                else:
-                    logger.debug(f"Card from cache: {self.scraper.get_card_name(card_name)}")
-                    new_card = False
-
-                # Instantiate card model
-                _card = self.cache['sets'][set_.name][card_name]
-                if _card:
-                    card = Card(_card, new=new_card)
-                    set_.append(card)
-                    self.download_card_images(card)
-                else:
-                    logger.warning(f"Can't find card [{set_.name}] - {card_name}")
+            # Instantiate card model
+            _card = self.cache['sets'][set_.name][card_name]
+            if _card:
+                card = Card(_card, new=new_card)
+                set_.append(card)
+                self.download_card_images(card)
+            else:
+                logger.warning(f"Can't find card [{set_.name}] - {card_name}")
             self.sets.append(set_)
         self.write_cache()
 
